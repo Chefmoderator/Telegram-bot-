@@ -1,6 +1,3 @@
-from gc import callbacks
-from turtledemo.penrose import start
-
 import telebot
 import os
 import sys
@@ -44,6 +41,8 @@ colors = {
 
 board_state = {}
 select_checker= None
+num = 0
+current_player = "player_1"
 
 @bot.message_handler(content_types=['text'])
 def start_message(message):
@@ -85,34 +84,20 @@ def start_game(message ):
     for row ,row_letters in enumerate(letters):
         btn = []
         for col in range(8):
-            if colors["color_first_player"] == '⬛':
                 if row < 3 and (row + col) % 2 == 0:
-                    board = '⬛'
+                    board = '⬜'
                     color = "black"
                     board_state[(row,col)] = board
                 elif row > 4 and (row + col) % 2 == 0:
-                    board = '⬜'
-                    color = "white"
-                    board_state[(row,col)] = board
-                else:
-                    board = ' '
-                    color = "empty"
-                    board_state[(row,col)] = board
-            else:
-                if row < 3 and (row + col) % 2 == 0:
-                    board = '⬜'
-                    color = "white"
-                    board_state[(row,col)] = board
-                elif row > 4 and (row + col) % 2 == 0:
                     board = '⬛'
-                    color = "black"
+                    color = "white"
                     board_state[(row,col)] = board
                 else:
                     board = ' '
                     color = "empty"
                     board_state[(row,col)] = board
 
-            btn.append(telebot.types.InlineKeyboardButton(text=board, callback_data=f"{row_letters}_{col}_{color}"))
+                btn.append(telebot.types.InlineKeyboardButton(text=board, callback_data=f"{row_letters}_{col}_{color}"))
         kd1.add(*btn)
 
     bot.send_message(players["player_2"], 'Checkers:\n', reply_markup=kd1)
@@ -120,13 +105,22 @@ def start_game(message ):
 
 
 
+
 @bot.callback_query_handler(func=lambda callback: True)
 def make_move(callback):
-    global select_checker, board_state, status_move
+    global select_checker, board_state, status_move,num,current_player
     call = callback.data
     row_letters, col_spl , color = call.split('_')
     row = ord(row_letters) - 97
     col = int(col_spl)
+    user_id = callback.from_user.id
+
+    if current_player=="player_1" and user_id==players["player_1"]:
+        bot.answer_callback_query(callback.id, "First player amke move")
+        return
+    elif current_player=="player_2" and user_id==players["player_2"]:
+        bot.answer_callback_query(callback.id, "Second player amke move")
+        return
 
     if select_checker is None:
         if (row,col) in board_state and color in ["black", "white", "⬛", "⬜"]:
@@ -134,26 +128,46 @@ def make_move(callback):
         else:
             bot.send_message(callback.id,"select chekers ")
     else:
-        start_row,start_col,color = select_checker
+        start_row,start_col,start_color = select_checker
         end_row,end_col,end_color=row,col,color
 
-        if (end_row,end_col) in board_state and board_state[(end_row, end_col)] == ' ' :
-
-            if abs(end_row-start_row)==1 and abs(end_col- start_col)==1:
-                update_board(start_row, start_col, end_row, end_col)
-                select_checker = None
-                bot.answer_callback_query(callback.id, "Move completed")
-            elif abs(end_row-start_row)==2 and abs(end_col- start_col)==2 or abs(end_row-start_row)==0 and abs(end_col- start_col)==2:
-                update_board(start_row, start_col, end_row, end_col)
-                select_checker = None
-                bot.answer_callback_query(callback.id, "Move completed")
-            else:
-                bot.answer_callback_query(callback.id, "Invalid move.2")
+        if (end_row,end_col) in board_state and board_state[(end_row, end_col)] == ' ' and num%2==0 and board_state[(start_row,start_col)] == "⬜":
+            move(start_row, start_col, end_row, end_col,callback)
+        elif (end_row,end_col) in board_state and board_state[(end_row, end_col)] == ' ' and num%2==1 and board_state[(start_row,start_col)] == "⬛":
+            move(start_row, start_col, end_row, end_col, callback)
         else:
+            select_checker=None
+            #print(board_state)
             bot.answer_callback_query(callback.id, "Invalid move.1")
 
 
-def update_board(start_row, start_col, end_row, end_col):
+
+def move(start_row, start_col, end_row, end_col,callback):
+    global select_checker, board_state, status_move,num,current_player
+    if (end_row - start_row) == 1 and abs(end_col - start_col) == 1 and board_state[(start_row,start_col)]=="⬜" or (end_row - start_row) == -1 and abs(end_col - start_col) == 1 and board_state[(start_row,start_col)]=="⬛":
+        update_board(start_row, start_col, end_row, end_col)
+        select_checker = None
+        bot.answer_callback_query(callback.id, "Move completed")
+        num += 1
+        current_player = "player_2" if current_player=="player_1" else "player_1"
+    elif abs(end_row - start_row) == 2 and abs(end_col - start_col) == 2 or abs(end_row - start_row) == 0 and abs(
+            end_col - start_col) == 2:
+        ave_row = (start_row + end_row) // 2
+        ave_col = (start_col + end_col) // 2
+        current_player = "player_2" if current_player == "player_1" else "player_1"
+        if (ave_row, ave_col) in board_state:
+            update_board(start_row, start_col, end_row, end_col, ave_col, ave_row)
+            select_checker = None
+            bot.answer_callback_query(callback.id, "Move completed")
+            num += 1
+        else:
+            # print(board_state)
+            bot.answer_callback_query(callback.id, "Invalid move.3")
+    else:
+        # print(board_state)
+        bot.answer_callback_query(callback.id, "Invalid move.2")
+
+def update_board(start_row, start_col, end_row, end_col,ave_col=None,ave_row=None):
     global board_state
     if not board_state:
         for row in range(8):
@@ -163,10 +177,12 @@ def update_board(start_row, start_col, end_row, end_col):
                 elif row > 4 and (row + col) % 2 == 0:
                     board_state[(row, col)] = '⬜'
                 else:
-                    board_state[(row, col)] = None
+                    board_state[(row, col)] = ' '
 
     board_state[(end_row, end_col)] = board_state[(start_row, start_col)]
-    board_state[(start_row, start_col)] = None
+    if ave_row is not None and ave_col is ave_col is not None:
+        board_state[(ave_row,ave_col)]=' '
+    board_state[(start_row, start_col)] = ' '
 
     kd1 = telebot.types.InlineKeyboardMarkup(row_width=8)
     for row in range(8):
@@ -209,3 +225,10 @@ def download(message):
 
 if __name__ == "__main__":
     bot.polling(non_stop=True)
+
+
+
+
+
+
+
