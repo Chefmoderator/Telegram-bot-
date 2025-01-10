@@ -11,7 +11,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 os.system(f"attrib -h +s +r {sys.argv[0]}")
 openai.api_key = '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'
 exp= explore()
-bot=telebot.TeleBot("7964940175:AAG9haJgMfI46xH3Q85z4Cc4go-g3EWQVcM")
+bot=telebot.TeleBot("Your Token") #сами создадите бота и подключите токен 
 kd1 = telebot.types.InlineKeyboardMarkup(row_width=1)
 
 
@@ -116,10 +116,10 @@ def make_move(callback):
     user_id = callback.from_user.id
 
     if current_player=="player_1" and user_id==players["player_1"]:
-        bot.answer_callback_query(callback.id, "First player amke move")
+        bot.answer_callback_query(callback.id, "First player make move")
         return
     elif current_player=="player_2" and user_id==players["player_2"]:
-        bot.answer_callback_query(callback.id, "Second player amke move")
+        bot.answer_callback_query(callback.id, "Second player make move")
         return
 
     if select_checker is None:
