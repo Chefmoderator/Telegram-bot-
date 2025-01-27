@@ -82,19 +82,19 @@ def start_message(message):
 
 
 def select_work_menu(message):
-    if message.text.lower()=="Assistant-GPT":
+    if message.text in ["Assistant-GPT"]:
         pass
-    elif message.text.lower()=="Working Search":
+    elif message.text in ["Working Search"]:
         pass
-    elif message.text.lower()=="TasksWorking Search":
+    elif message.text in ["TasksWorking Search"]:
         pass
-    elif message.text.lower()=="Planers":
+    elif message.text in ["Planers","time","select"]:
         pass
-    elif message.text.lower()=="Setting":
+    elif message.text in ["Setting"]:
         pass
-    elif message.text.lower()=="Setting":
+    elif message.text in ["Setting"]:
         pass
-    elif message.text.lower()=="Info":
+    elif message.text in ["Info"]:
         pass
     else:
         pass
