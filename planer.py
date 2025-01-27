@@ -6,7 +6,7 @@ from itertools import count
 import telebot
 
 project_bd = {}
-project_time = None
+project_time = None 
 project_name = None
 db = sqlite3.connect('index.db')
 sql = db.cursor()
@@ -15,9 +15,9 @@ sql.execute('''CREATE TABLE IF NOT EXISTS projects (
 )''')
 
 class Planner:
+    global project_time
     def proj(self, message):
-        from bot import bot
-        global project_time
+        from bot import bot
 
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
         for i in range(30):
@@ -28,8 +28,7 @@ class Planner:
         bot.send_message(message.chat.id, "Выберите дату", reply_markup=markup)
 
 
-    def handle_date_selection(self, message):
-        global project_time
+    def handle_date_selection(self, message):
         from bot import bot
         print(f"Message text: {message.text}")
         if message.text != 'planers':
