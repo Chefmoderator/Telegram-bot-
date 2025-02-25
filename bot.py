@@ -18,8 +18,8 @@ def send_welcome(message):
     item1 = telebot.types.KeyboardButton("explore")
     item2 = telebot.types.KeyboardButton("download")
     item3 = telebot.types.KeyboardButton("game")
-    item4 = telebot.types.KeyboardButton("work menu")
-    markup.add(item1, item2, item3,item4)
+    
+    markup.add(item1, item2, item3)
     bot.send_message(message.chat.id,"Выберете что вам надо",reply_markup=markup)
 
 
@@ -68,36 +68,10 @@ def start_message(message):
                 start_game(message)
             else:
                 colors["color_second_player"], colors["color_first_player"] = ("⬛", "⬜") if random.randint(0, 1) else ("⬜", "⬛")
-    elif message.text.lower() == "Work menu":
-        markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = telebot.types.KeyboardButton("Assistant-GPT")
-        item2 = telebot.types.KeyboardButton("Working Search")
-        item3 = telebot.types.KeyboardButton("Tasks")
-        item4 = telebot.types.KeyboardButton("Planers")
-        item5 = telebot.types.KeyboardButton('Setting')
-        item6 = telebot.types.KeyboardButton('Info')
-        markup.add(item1, item2, item3, item4, item5, item6)
-        bot.send_message(message.chat.id, "Выберете что вам надо", reply_markup=markup)
-        select_work_menu(message)
+    
 
 
-def select_work_menu(message):
-    if message.text in ["Assistant-GPT"]:
-        pass
-    elif message.text in ["Working Search"]:
-        pass
-    elif message.text in ["TasksWorking Search"]:
-        pass
-    elif message.text in ["Planers","time","select"]:
-        pass
-    elif message.text in ["Setting"]:
-        pass
-    elif message.text in ["Setting"]:
-        pass
-    elif message.text in ["Info"]:
-        pass
-    else:
-        pass
+
 
 def start_game(message ):
     kd1 = telebot.types.InlineKeyboardMarkup(row_width=8)
